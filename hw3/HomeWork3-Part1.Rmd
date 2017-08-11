@@ -1,0 +1,343 @@
+---
+title: "HomeWork3-Prt1"
+author: "Naren Suri"
+date: "September 30, 2015"
+output: html_document
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+#install.packages("noncensus")
+library(noncensus)
+data(counties)
+
+CalculateFourths = function(dataset){
+dataset = sort(dataset)
+len = length(dataset)
+if((len%%2)==0){
+  medianData = median(dataset)
+  fourthDepth = len/4
+  uperfourthDepth = len - fourthDepth
+  frth = dataset[fourthDepth]
+  Ufrth = dataset[uperfourthDepth]
+  spread = Ufrth-frth
+  fourths = c(spread,medianData)
+  return(fourths)
+  
+}
+else{
+  medianData = median(dataset)
+  medianDepth = (len+1)/2
+  fourthDepth = (medianDepth+1)/2
+  uperfourthDepth = (len - fourthDepth)+1
+  frth = dataset[fourthDepth]
+  Ufrth = dataset[uperfourthDepth]
+  spread = Ufrth-frth
+  fourths = c(spread,medianData)
+  return(fourths)}
+}
+
+states = levels(counties$state)
+# lets prepare the lists to store the data, so that we can directly lpot them in the future
+MeadianList = c()
+StatesList =c()
+SpreadList =c()
+
+for(Astate in states)
+{
+DataOfAState = counties[counties$state==Astate,]
+ResultFourths = CalculateFourths(DataOfAState$population)
+if(!is.na(ResultFourths[1]) && ResultFourths[1] != 0)
+{MeadianList = c(MeadianList,ResultFourths[2])
+SpreadList = c(SpreadList,ResultFourths[1])
+StatesList = c(StatesList,Astate)}
+}
+
+# plotting the graphs for each state
+# now we shall log the meddian and spread that was obtained
+MeadianList = log10(MeadianList)
+SpreadList = log10(SpreadList)
+plot(MeadianList,SpreadList, col="orange")
+LinearModel = lm(SpreadList~MeadianList)
+abline(LinearModel,lty=4,col="green")
+# Find the coeficients of the lm wee have drawn
+coefficients(LinearModel)
+LinearModel$coefficients[2]
+# This value is approximately 0.914, which is equal to 0
+# p =1-b that is, 1-0.92 = which is aproximatly 0
+# so there is no power transform required for this, as its almost zero
+# for the 0 = p, tukey gave log transform
+
+# So lets do a log transform now.
+
+# the values of the logged median and spread are obtained above already so we have to just plot them
+plot(MeadianList,SpreadList, col="orange")
+LinearModel = lm(SpreadList~MeadianList)
+abline(LinearModel,lty=4,col="green")
+
+# Question 1 : part c
+# give the box plot before and after transform
+# this is the boxplot for the data with the 50 states, with out transformation
+library(ggplot2)
+data("counties")
+ggplot(counties, aes(state, population)) + geom_boxplot(aes(fill=state)) + coord_flip()
+
+# now lets draw th boxplot with transformation
+LogAppliedToPopulation = log10(counties$population)
+# lets add the extra column instead of touching the original population column
+counties["LogOfpopulation"] = LogAppliedToPopulation
+# now use the same ggplot, but with the changed popluation data
+
+ggplot(counties, aes(state, LogOfpopulation)) + geom_boxplot(aes(fill=state)) + coord_flip()
+# By comparing the original and the log valued boxplots, its very clear that the boxplots made from the transformed one makes it clear to visualize and infer from it.
+
+# Question 1 : D
+# we are asked to geneate the letter value and the summaries table. Lets do that according to the way it was mentioned in the text book
+
+source("E:/Sem1-DataScience/Exploratory-DA/home-work/hw3/lvalprogs.r")
+# collecting the california data
+califData = counties[counties$state == "CA",]
+lval(califData$population)
+# now we shall capture thiss data in to another variable
+LeterValRsult = lval(califData$population)
+#since we have got 7 rows, instead of automating thrugh code iam hardcoding it.
+DataLeterVal=data.frame(LeterValRsult)
+DataLeterVal["(XL+XU)/2"]=(((DataLeterVal[,2]+DataLeterVal[,3])/2) - DataLeterVal[1,4])
+
+DataLeterVal["((Xu-M)^2+(M-XL)^2)/4M"]=((((DataLeterVal[,2]-DataLeterVal[1,4])^2)+((DataLeterVal[1,4]-DataLeterVal[,3])^2))/(4*DataLeterVal[1,4]))
+
+DataLeterVal["pVal"]= 1-(DataLeterVal[,7]/DataLeterVal[,8])
+
+DataLeterVal["LetterVal"]= c("M","F","E","D","C","B","A") # complete Table generated
+NewTable = DataLeterVal[,c(10,1,2,3,7,8,9)]
+# Now lets remove the First Row
+NewCleanTable = NewTable[2:7,]
+# So thus we have formed the complete table as we wanted
+
+# now we have calculate the p value
+FinalPvalue=median(NewTable[2:7,7])
+# so the P value is
+FinalPvalue
+# plot the graph 
+plot(NewCleanTable[,3],NewCleanTable[,4],pch=4, col="orange",xlab = "(xl-M)^2+(xu-M)^2/4M", ylab =
+"(xL+xU)/2-M")
+
+#Transform on the whole population data column - for all states
+pop = counties$population
+lval(pop)
+# now we shall capture thiss data in to another variable
+LeterValRsult = lval(pop)
+#since we have got 7 rows, instead of automating thrugh code iam hardcoding it.
+DataLeterVal=data.frame(LeterValRsult)
+DataLeterVal["(XL+XU)/2"]=(((DataLeterVal[,2]+DataLeterVal[,3])/2) - DataLeterVal[1,4])
+
+DataLeterVal["((Xu-M)^2+(M-XL)^2)/4M"]=((((DataLeterVal[,2]-DataLeterVal[1,4])^2)+((DataLeterVal[1,4]-DataLeterVal[,3])^2))/(4*DataLeterVal[1,4]))
+
+DataLeterVal["pVal"]= 1-(DataLeterVal[,7]/DataLeterVal[,8])
+
+DataLeterVal["LetterVal"]= c("M","F","E","D","C","B","A","z","y","x","w","v","u") # complete Table generated
+NewTable = DataLeterVal[,c(10,1,2,3,7,8,9)]
+# Now lets remove the First Row
+NewCleanTable = NewTable[2:13,]
+# So thus we have formed the complete table as we wanted
+
+# now we have calculate the p value
+FinalPvalue=median(NewTable[2:13,7])
+# so the P value is
+FinalPvalue
+# plot the graph 
+plot(NewCleanTable[,3],NewCleanTable[,4],pch=4, col="orange",xlab = "(xl-M)^2+(xu-M)^2/4M", ylab =
+"(xL+xU)/2-M")
+
+#The P value's for both the level spread and the symmetry is around 0.97, so both are similar
+
+#Question 1.F:
+
+californiaData = counties[counties$state == "CA",]
+
+logtransforData = log10(californiaData$population)
+M = median(californiaData$population)
+b = M/0.4343
+a = M - b*log10(M)
+# so a value
+a
+# The value of B
+b
+# Finally the Z calculation
+z = a + b*logtransforData
+median(z)
+# The symetric equation for the given data is  z = -1987702 + 412481*log10(x)
+
+# =================================================================================================
+# =================================================================================================
+
+# Question 2
+
+# We have to get the data from the external data file, ceo file here
+
+ceoDatatable = read.table("E:/Sem1-DataScience/Exploratory-DA/home-work/hw3/ceo.txt", header = T)
+dataOfCeo = ceoDatatable$TotalCompensation
+# The total number of compesntaions are
+length(dataOfCeo)
+
+# The maximum of the compensations is
+paidMax = max(dataOfCeo)
+# the highest paid CEO amunt is
+paidMax
+# boxplot to the data given helps us to understand what is going with the data
+boxplot(dataOfCeo, col = "green", main = "Box Plot - given data", ylab = "CompensationForCeo")
+# if you observe the data is skeedd and wee dont really see any useful information in it, we can not really make any value of it with high clarity.
+# so better we transform in to the approches we hae
+
+# lets dra one more simple graph that helps us understand the behaviour of the data
+hist(dataOfCeo, col = "red", main = "Histogram of the original data ", ylab = "Compensation")
+# this graph is also skewed one side
+# So we have to apply a transform to it, to make it clear for us.
+
+#Question 2.c:
+ # what trasnform you propose for the data?
+# leets use the one of the previous techniques we used.
+
+lval(dataOfCeo)
+# now we shall capture thiss data in to another variable
+LeterValRsult = lval(dataOfCeo)
+#since we have got 7 rows, instead of automating thrugh code iam hardcoding it.
+DataLeterVal=data.frame(LeterValRsult)
+DataLeterVal["(XL+XU)/2"]=(((DataLeterVal[,2]+DataLeterVal[,3])/2) - DataLeterVal[1,4])
+
+DataLeterVal["((Xu-M)^2+(M-XL)^2)/4M"]=((((DataLeterVal[,2]-DataLeterVal[1,4])^2)+((DataLeterVal[1,4]-DataLeterVal[,3])^2))/(4*DataLeterVal[1,4]))
+
+DataLeterVal["pVal"]= 1-(DataLeterVal[,7]/DataLeterVal[,8])
+
+DataLeterVal["LetterVal"]= c("M","F","E","D","C","B","A","z","y","x","w","v") # complete Table generated
+NewTable = DataLeterVal[,c(10,1,2,3,7,8,9)]
+# Now lets remove the First Row
+NewCleanTable = NewTable[2:12,]
+# So thus we have formed the complete table as we wanted
+
+# now we have calculate the p value
+FinalPvalue=median(NewTable[2:12,7])
+# so the P value is
+FinalPvalue
+# plot the graph 
+plot(NewCleanTable[,3],NewCleanTable[,4],pch=4, col="orange",xlab = "(xl-M)^2+(xu-M)^2/4M", ylab =
+"(xL+xU)/2-M")
+
+lval(dataOfCeo)
+boxplot(dataOfCeo, col = "red", main = "Box plot")
+
+
+
+# Let use sme two transformations and see how each   behaves
+# square root transformation 
+
+sqareRoottrans = dataOfCeo^(1/2)
+
+LeterValRsult3 = lval(sqareRoottrans)
+#since we have got 7 rows, instead of automating thrugh code iam hardcoding it.
+DataLeterVal3=data.frame(LeterValRsult3)
+DataLeterVal3["(XL+XU)/2"]=(((DataLeterVal3[,2]+DataLeterVal3[,3])/2) - DataLeterVal3[1,4])
+
+DataLeterVal3["((Xu-M)^2+(M-XL)^2)/4M"]=((((DataLeterVal3[,2]-DataLeterVal3[1,4])^2)+((DataLeterVal3[1,4]-DataLeterVal3[,3])^2))/(4*DataLeterVal3[1,4]))
+
+DataLeterVal3["pVal"]= 1-(DataLeterVal3[,7]/DataLeterVal3[,8])
+
+DataLeterVal3["LetterVal"]= c("M","F","E","D","C","B","A","z","y","x","w","v") # complete Table generated
+NewTable3 = DataLeterVal3[,c(10,1,2,3,7,8,9)]
+# Now lets remove the First Row
+NewCleanTable3 = NewTable3[2:12,]
+# So thus we have formed the complete table as we wanted
+
+# now we have calculate the p value
+FinalPvalue3=median(NewTable3[2:12,7])
+# so the P value is
+FinalPvalue3
+# plot the graph 
+plot(NewCleanTable3[,3],NewCleanTable3[,4],pch=4, col="orange",xlab = "(xl-M)^2+(xu-M)^2/4M", ylab =
+"(xL+xU)/2-M")
+
+abline(lm(NewCleanTable3[,3]~NewCleanTable3[,4]), col = "orange", lty = 4)
+lval(sqareRoottrans)
+boxplot(sqareRoottrans, col = "red", main = "Box plot of the square root transforma
+tion", ylab = "Compensation")
+
+# Now lets calculate the fourth root and see how that works
+
+sqareRoottrans = dataOfCeo^(1/4)
+
+LeterValRsult3 = lval(sqareRoottrans)
+#since we have got 7 rows, instead of automating thrugh code iam hardcoding it.
+DataLeterVal3=data.frame(LeterValRsult3)
+DataLeterVal3["(XL+XU)/2"]=(((DataLeterVal3[,2]+DataLeterVal3[,3])/2) - DataLeterVal3[1,4])
+
+DataLeterVal3["((Xu-M)^2+(M-XL)^2)/4M"]=((((DataLeterVal3[,2]-DataLeterVal3[1,4])^2)+((DataLeterVal3[1,4]-DataLeterVal3[,3])^2))/(4*DataLeterVal3[1,4]))
+
+DataLeterVal3["pVal"]= 1-(DataLeterVal3[,7]/DataLeterVal3[,8])
+
+DataLeterVal3["LetterVal"]= c("M","F","E","D","C","B","A","z","y","x","w","v") # complete Table generated
+NewTable3 = DataLeterVal3[,c(10,1,2,3,7,8,9)]
+# Now lets remove the First Row
+NewCleanTable3 = NewTable3[2:12,]
+# So thus we have formed the complete table as we wanted
+
+# now we have calculate the p value
+FinalPvalue3=median(NewTable3[2:12,7])
+# so the P value is
+FinalPvalue3
+# plot the graph 
+plot(NewCleanTable3[,3],NewCleanTable3[,4],pch=4, col="orange",xlab = "(xl-M)^2+(xu-M)^2/4M", ylab =
+"(xL+xU)/2-M")
+
+abline(lm(NewCleanTable3[,3]~NewCleanTable3[,4]), col = "orange", lty = 4)
+lval(sqareRoottrans)
+boxplot(sqareRoottrans, col = "red", main = "Box plot of the square root transforma
+tion", ylab = "Compensation")
+
+# What wee observe from both of these square root and fourth oot is, Fourth root is better. Because fouth root reduces ouliers and transforms in a way that makes it clear to a better extent.
+
+# =================================================================================================
+# =================================================================================================
+
+# Question 3 :
+FourthLowers = c(3480, 2412, 1788, 1517, 1248, 963.5, 727.5, 579, 345, 114)
+MidSummaries = c(3480, 3678, 4115.5, 4400.5, 4799, 4978.75, 5241, 5394.5, 5510.25, 5494)
+FourthUppers = c(3480, 4944, 6443, 7284, 8350, 8994, 9754.5, 10210, 10675.5, 10874)
+
+# writing all thesse data in to the matrix form to #have a glance as it looks in the texxtbook
+
+HouseIncomeData = matrix(data=c(FourthLowers,MidSummaries,FourthUppers), ncol=3)
+HouseIncomeData
+
+# according to the equations we saw in the text #book page 120 a = x0 - (T(x0)/Derivat(T(x0))), #similarly b = 1/deriv(t(x0))
+
+Deivative = deriv(~x^(1/3),"x",func=T)
+MedianMidsummary = MidSummaries[1]
+# now lets calculat b first
+ForB = Deivative(MedianMidsummary)
+BValue = as.vector(1/ attr(ForB, "gradient"))
+# now lets find the A value
+AValue = as.vector(MedianMidsummary - BValue*MedianMidsummary^(1/3))
+AValue
+# to calculate the z value, we need to transform = cube root transfom this data
+CuberootTransformation = HouseIncomeData^(1/3)
+# now lets find the value of the z
+zValue = AValue + BValue*CuberootTransformation
+zValue
+
+# lets draw the letter value plot
+source("E:/Sem1-DataScience/Exploratory-DA/home-work/hw3/lvalprogs.r")
+lval(zValue)
+# A values
+AValue
+# B value
+BValue
+# compare the two summaries we got
+# original Data
+HouseIncomeData
+# new transformed summaries data
+zValue
+# if we observe the midsummaries of the two data's The original and the new, they looks similar. So our transfomration makes sense.
+

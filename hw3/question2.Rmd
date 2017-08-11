@@ -1,0 +1,139 @@
+---
+title: "Question2"
+author: "Naren Suri"
+date: "October 1, 2015"
+output: html_document
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+
+# Question 2
+
+# We have to get the data from the external data file, ceo file here
+
+ceoDatatable = read.table("E:/Sem1-DataScience/Exploratory-DA/home-work/hw3/ceo.txt", header = T)
+dataOfCeo = ceoDatatable$TotalCompensation
+# The total number of compesntaions are
+length(dataOfCeo)
+
+# The maximum of the compensations is
+paidMax = max(dataOfCeo)
+# the highest paid CEO amunt is
+paidMax
+# boxplot to the data given helps us to understand what is going with the data
+boxplot(dataOfCeo, col = "green", main = "Box Plot - given data", ylab = "CompensationForCeo")
+# if you observe the data is skeedd and wee dont really see any useful information in it, we can not really make any value of it with high clarity.
+# so better we transform in to the approches we hae
+
+# lets dra one more simple graph that helps us understand the behaviour of the data
+hist(dataOfCeo, col = "red", main = "Histogram of the original data ", ylab = "Compensation")
+# this graph is also skewed one side
+# So we have to apply a transform to it, to make it clear for us.
+
+#Question 2.c:
+ # what trasnform you propose for the data?
+# leets use the one of the previous techniques we used.
+
+lval(dataOfCeo)
+# now we shall capture thiss data in to another variable
+LeterValRsult = lval(dataOfCeo)
+#since we have got 7 rows, instead of automating thrugh code iam hardcoding it.
+DataLeterVal=data.frame(LeterValRsult)
+DataLeterVal["(XL+XU)/2"]=(((DataLeterVal[,2]+DataLeterVal[,3])/2) - DataLeterVal[1,4])
+
+DataLeterVal["((Xu-M)^2+(M-XL)^2)/4M"]=((((DataLeterVal[,2]-DataLeterVal[1,4])^2)+((DataLeterVal[1,4]-DataLeterVal[,3])^2))/(4*DataLeterVal[1,4]))
+
+DataLeterVal["pVal"]= 1-(DataLeterVal[,7]/DataLeterVal[,8])
+
+DataLeterVal["LetterVal"]= c("M","F","E","D","C","B","A","z","y","x","w","v") # complete Table generated
+NewTable = DataLeterVal[,c(10,1,2,3,7,8,9)]
+# Now lets remove the First Row
+NewCleanTable = NewTable[2:12,]
+# So thus we have formed the complete table as we wanted
+
+# now we have calculate the p value
+FinalPvalue=median(NewTable[2:12,7])
+# so the P value is
+FinalPvalue
+# plot the graph 
+plot(NewCleanTable[,3],NewCleanTable[,4],pch=4, col="orange",xlab = "(xl-M)^2+(xu-M)^2/4M", ylab =
+"(xL+xU)/2-M")
+
+lval(dataOfCeo)
+boxplot(dataOfCeo, col = "red", main = "Box plot")
+
+
+
+# Let use sme two transformations and see how each   behaves
+# square root transformation 
+
+sqareRoottrans = dataOfCeo^(1/2)
+
+LeterValRsult3 = lval(sqareRoottrans)
+#since we have got 7 rows, instead of automating thrugh code iam hardcoding it.
+DataLeterVal3=data.frame(LeterValRsult3)
+DataLeterVal3["(XL+XU)/2"]=(((DataLeterVal3[,2]+DataLeterVal3[,3])/2) - DataLeterVal3[1,4])
+
+DataLeterVal3["((Xu-M)^2+(M-XL)^2)/4M"]=((((DataLeterVal3[,2]-DataLeterVal3[1,4])^2)+((DataLeterVal3[1,4]-DataLeterVal3[,3])^2))/(4*DataLeterVal3[1,4]))
+
+DataLeterVal3["pVal"]= 1-(DataLeterVal3[,7]/DataLeterVal3[,8])
+
+DataLeterVal3["LetterVal"]= c("M","F","E","D","C","B","A","z","y","x","w","v") # complete Table generated
+NewTable3 = DataLeterVal3[,c(10,1,2,3,7,8,9)]
+# Now lets remove the First Row
+NewCleanTable3 = NewTable3[2:12,]
+# So thus we have formed the complete table as we wanted
+
+# now we have calculate the p value
+FinalPvalue3=median(NewTable3[2:12,7])
+# so the P value is
+FinalPvalue3
+# plot the graph 
+plot(NewCleanTable3[,3],NewCleanTable3[,4],pch=4, col="orange",xlab = "(xl-M)^2+(xu-M)^2/4M", ylab =
+"(xL+xU)/2-M")
+
+abline(lm(NewCleanTable3[,3]~NewCleanTable3[,4]), col = "orange", lty = 4)
+lval(sqareRoottrans)
+boxplot(sqareRoottrans, col = "red", main = "Box plot of the square root transforma
+tion", ylab = "Compensation")
+
+# Now lets calculate the fourth root and see how that works
+
+sqareRoottrans = dataOfCeo^(1/4)
+
+LeterValRsult3 = lval(sqareRoottrans)
+#since we have got 7 rows, instead of automating thrugh code iam hardcoding it.
+DataLeterVal3=data.frame(LeterValRsult3)
+DataLeterVal3["(XL+XU)/2"]=(((DataLeterVal3[,2]+DataLeterVal3[,3])/2) - DataLeterVal3[1,4])
+
+DataLeterVal3["((Xu-M)^2+(M-XL)^2)/4M"]=((((DataLeterVal3[,2]-DataLeterVal3[1,4])^2)+((DataLeterVal3[1,4]-DataLeterVal3[,3])^2))/(4*DataLeterVal3[1,4]))
+
+DataLeterVal3["pVal"]= 1-(DataLeterVal3[,7]/DataLeterVal3[,8])
+
+DataLeterVal3["LetterVal"]= c("M","F","E","D","C","B","A","z","y","x","w","v") # complete Table generated
+NewTable3 = DataLeterVal3[,c(10,1,2,3,7,8,9)]
+# Now lets remove the First Row
+NewCleanTable3 = NewTable3[2:12,]
+# So thus we have formed the complete table as we wanted
+
+# now we have calculate the p value
+FinalPvalue3=median(NewTable3[2:12,7])
+# so the P value is
+FinalPvalue3
+# plot the graph 
+plot(NewCleanTable3[,3],NewCleanTable3[,4],pch=4, col="orange",xlab = "(xl-M)^2+(xu-M)^2/4M", ylab =
+"(xL+xU)/2-M")
+
+abline(lm(NewCleanTable3[,3]~NewCleanTable3[,4]), col = "orange", lty = 4)
+lval(sqareRoottrans)
+boxplot(sqareRoottrans, col = "red", main = "Box plot of the square root transforma
+tion", ylab = "Compensation")
+
+# What wee observe from both of these square root and fourth oot is, Fourth root is better. Because fouth root reduces ouliers and transforms in a way that makes it clear to a better extent.
+
+```
+

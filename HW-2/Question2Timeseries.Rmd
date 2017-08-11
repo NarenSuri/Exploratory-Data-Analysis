@@ -1,0 +1,609 @@
+---
+title: "Home-Work-2"
+author: "Naren Suri"
+date: "September 15, 2015"
+output: pdf_document
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+Question 1: Lval plot
+```{r}
+source("lvalprogs.r")
+print("used the exponential funciton with just two parameters, a simple one with rate and n")
+DataForLeterVal = rexp(1000, 1) 
+lval(DataForLeterVal)
+
+```
+Question 2:
+
+```{r}
+#
+setwd("D:/Sem1-DataScience/Exploratory-DA/home-work/HW-2");
+TimeSeriesData = scan("D:/Sem1-DataScience/Exploratory-DA/home-work/HW-2/timeseries.dat")
+#TimeSeriesData;
+Datatimeseries = ts(TimeSeriesData, frequency=12, start=c(1997,1))
+plot.ts(Datatimeseries)
+```
+ Stem and Leaf plot
+ there are postive skews, negitive skews, unimodel, bimodel - modality represents the peaks on the curve.
+
+``` {r}
+library("aplpack", lib.loc="~/R/win-library/3.2")
+stem.leaf(TimeSeriesData,m=2)
+```
+this has two stems, and mean is 11. Depth of each data point is also illustrated in the left. 
+This has the bimodel nature, since it got two peaks.
+
+``` {r}
+stem(TimeSeriesData)
+```
+this has got the most likely distributed curve. However, it has one data point that makes it the right skew.
+
+```{r}
+stem.leaf(TimeSeriesData,m=1)
+```
+
+it got a mean 9, and the depth of the data points are illustrated to the left.
+This has the bimodel nature, since it has got two peaks. And the data is right skewd too.
+
+Plot a letter value plot. The letter valu plots gives extra details regarding its tails. which means we can have a clar understanding of the outliers. They are not dense at the tails, but gives good details of the data points those are nar to quartiles and those are outliers.
+```{r}
+source("lvalprogs.r")
+lvplot(TimeSeriesData)
+
+```
+The result cearly shows that there is an outlier in the result obtained. The one value above the 25 is an outlier. THe other few circles those we see are very near to the quartiles we have, so the outlier of the data is clarly identified with the level plot.
+
+The plot is skewed a little bit to the right. Though its look like a normally distributed graph, its not a normalized one completely. The density plot below confirms the same. 
+
+```{r}
+plot(density(TimeSeriesData,kernal=("epanechnikov")),col="blue")
+
+```
+
+The QQ Plots, we draw the qqnorm, which draws the qq plot of the given data and the general normal dstribution to compare how well the given data is normalized.
+```{r}
+qqnorm(TimeSeriesData, main='PLots')
+qqline(TimeSeriesData)
+```
+The Data is decently Normall Distributed. But as you se there are very few points who are deviated from the line. This states that the given data is Almost and very well Normalized.
+
+-----------------------------------------------------------------------------------
+
+Question 3:
+
+The outside cut off talks about the values beyond the 2% of the nrmal distribution. 2%,14%,32% 32%,14%,2% . So the outside cut off value is two-Standard deviations away from the mean. Gausian said that any thing beyond 1.5df+Fu will be considered as the cut off point, and the area from there would be cutoff area. And this signifies the outlier too.
+
+The average outside cutoff given by gausian for a single batch is : 0.4+0.007n
+
+(a) In a single batch of 120 observations?
+
+```{r}
+outsideCutoff = 0.4+0.007*120
+outsideCutoff
+```
+Is The ouside cutoff 
+
+(b) In total for two batches of 60?
+
+```{r}
+outsideCutoffBatch1 = 0.4+0.007*60
+
+outsideCutoffBatch2 = 0.4+0.007*60
+
+result = outsideCutoffBatch1 + outsideCutoffBatch2
+
+result
+```
+is The ouside cutoff for both the batches 
+
+(c) In total for batches of 40, 30, 20, 10, 5, 5, 5, and 5?
+
+```{r}
+outsideCutoffBatch1 = 0.4+0.007*40
+outsideCutoffBatch2 = 0.4+0.007*30
+outsideCutoffBatch3 = 0.4+0.007*20
+outsideCutoffBatch4 = 0.4+0.007*10
+outsideCutoffBatch5 = 0.4+0.007*5
+outsideCutoffBatch6 = 0.4+0.007*5
+outsideCutoffBatch7 = 0.4+0.007*5
+outsideCutoffBatch8 = 0.4+0.007*5
+result = outsideCutoffBatch1 + outsideCutoffBatch2+ outsideCutoffBatch3+ outsideCutoffBatch4+ outsideCutoffBatch5+ outsideCutoffBatch6+ outsideCutoffBatch7+ outsideCutoffBatch8
+result
+```
+is The ouside cutoff for all the batches  
+
+-----------------------------------------------------------------------------
+
+Question 4:
+
+1. Plot the data by year for (1st, 2nd, 3rd, 4th, 5th) 10 states all on one graph (connect the points by lines). Plot a solid horizontal line at 50% for visual comparison (anchoring). Do any lines appear different from the others? Which ones? Compare plots. 
+
+```{r}
+library("cluster")
+library("ggplot2")
+library("grid")
+library("gridExtra")
+library("cowplot")
+
+data(votes.repub)
+#help(votes.repub)
+#votes.repub
+firstTenStates = votes.repub[1:10,]
+#firstTenStates
+# Aglomerative 
+agglo <- agnes(firstTenStates, metric = "manhattan", stand = TRUE)
+#agglo
+plot(agglo)
+
+# line plots to compare the 10 different states
+#row.names(votes.repub)
+votes.repub$states=row.names(votes.repub)
+completeData = votes.repub
+library(reshape2)
+meltedData <- melt(completeData, id="states")
+# but we shall melt data of only first 10 rows to plot the first ten states
+firstTenstateRows =  completeData[1:10,c(4:8,11,29:32)]
+#firstTenstateRows
+meltFirstTenStates = melt(firstTenstateRows,id="states")
+#meltFirstTenStates
+Plot1 = ggplot(meltFirstTenStates,aes(x= meltFirstTenStates$variable, y=meltFirstTenStates$value))+geom_line(aes(group = meltFirstTenStates$states, colour=meltFirstTenStates$states))+geom_abline(intercept = 50, slope = 0)
+ggplot(meltFirstTenStates,aes(x= meltFirstTenStates$variable, y=meltFirstTenStates$value))+geom_line(aes(group = meltFirstTenStates$states, colour=meltFirstTenStates$states))+geom_abline(intercept = 50, slope = 0)
+```
+Second Group of states Graphs
+
+```{r}
+library("cluster")
+data(votes.repub)
+#help(votes.repub)
+#votes.repub
+
+# line plots to compare the 10 different states
+#row.names(votes.repub)
+votes.repub$states=row.names(votes.repub)
+completeData = votes.repub
+library(reshape2)
+meltedData <- melt(completeData, id="states")
+# but we shall melt data of only first 10 rows to plot the first ten states
+firstTenstateRows =  completeData[11:20,c(4:8,11,29:32)]
+#firstTenstateRows
+meltFirstTenStates = melt(firstTenstateRows,id="states")
+#meltFirstTenStates
+Plot2 = ggplot(meltFirstTenStates,aes(x= meltFirstTenStates$variable, y=meltFirstTenStates$value))+geom_line(aes(group = meltFirstTenStates$states, colour=meltFirstTenStates$states))+geom_abline(intercept = 50, slope = 0)
+
+ggplot(meltFirstTenStates,aes(x= meltFirstTenStates$variable, y=meltFirstTenStates$value))+geom_line(aes(group = meltFirstTenStates$states, colour=meltFirstTenStates$states))+geom_abline(intercept = 50, slope = 0)
+
+```
+Third Group of states Graphs
+
+```{r}
+library("cluster")
+data(votes.repub)
+#help(votes.repub)
+#votes.repub
+
+# line plots to compare the 10 different states
+#row.names(votes.repub)
+votes.repub$states=row.names(votes.repub)
+completeData = votes.repub
+library(reshape2)
+meltedData <- melt(completeData, id="states")
+# but we shall melt data of only first 10 rows to plot the first ten states
+firstTenstateRows =  completeData[21:30,c(4:8,11,29:32)]
+#firstTenstateRows
+meltFirstTenStates = melt(firstTenstateRows,id="states")
+#meltFirstTenStates
+Plot3 = ggplot(meltFirstTenStates,aes(x= meltFirstTenStates$variable, y=meltFirstTenStates$value))+geom_line(aes(group = meltFirstTenStates$states, colour=meltFirstTenStates$states))+geom_abline(intercept = 50, slope = 0)
+
+ggplot(meltFirstTenStates,aes(x= meltFirstTenStates$variable, y=meltFirstTenStates$value))+geom_line(aes(group = meltFirstTenStates$states, colour=meltFirstTenStates$states))+geom_abline(intercept = 50, slope = 0)
+
+```
+Fourth Group of states Graphs
+
+```{r}
+library("cluster")
+data(votes.repub)
+#help(votes.repub)
+#votes.repub
+
+# line plots to compare the 10 different states
+#row.names(votes.repub)
+votes.repub$states=row.names(votes.repub)
+completeData = votes.repub
+library(reshape2)
+meltedData <- melt(completeData, id="states")
+# but we shall melt data of only first 10 rows to plot the first ten states
+firstTenstateRows =  completeData[31:40,c(4:8,11,29:32)]
+#firstTenstateRows
+meltFirstTenStates = melt(firstTenstateRows,id="states")
+#meltFirstTenStates
+Plot4 = ggplot(meltFirstTenStates,aes(x= meltFirstTenStates$variable, y=meltFirstTenStates$value))+geom_line(aes(group = meltFirstTenStates$states, colour=meltFirstTenStates$states))+geom_abline(intercept = 50, slope = 0)
+
+ggplot(meltFirstTenStates,aes(x= meltFirstTenStates$variable, y=meltFirstTenStates$value))+geom_line(aes(group = meltFirstTenStates$states, colour=meltFirstTenStates$states))+geom_abline(intercept = 50, slope = 0)
+
+
+```
+Fifth Group of states Graphs
+
+```{r}
+library("cluster")
+data(votes.repub)
+#help(votes.repub)
+#votes.repub
+
+# line plots to compare the 10 different states
+#row.names(votes.repub)
+votes.repub$states=row.names(votes.repub)
+completeData = votes.repub
+library(reshape2)
+# but we shall melt data of only first 10 rows to plot the first ten states
+firstTenstateRows =  completeData[41:50,c(4:8,11,29:32)]
+#firstTenstateRows
+meltFirstTenStates = melt(firstTenstateRows,id="states")
+#meltFirstTenStates
+Plot5 = ggplot(meltFirstTenStates,aes(x= meltFirstTenStates$variable, y=meltFirstTenStates$value))+geom_line(aes(group = meltFirstTenStates$states, colour=meltFirstTenStates$states))+geom_abline(intercept = 50, slope = 0)
+
+ggplot(meltFirstTenStates,aes(x= meltFirstTenStates$variable, y=meltFirstTenStates$value))+geom_line(aes(group = meltFirstTenStates$states, colour=meltFirstTenStates$states))+geom_abline(intercept = 50, slope = 0)
+print("plotting every graph on a single page using grid is making it clumsy over the pdf. But it looks decent on the image-zoom mode of R ")
+
+plot_grid(Plot1, Plot2, labels=c("A", "B"), ncol = 1, nrow = 5)
+
+
+```
+
+2. Would a more sensible grouping of states make sense?
+1-Northeast: CT DE ME MA NH NJ NY PA RI VT 
+2-Mid-Atlantic/East-Central: KY MD NC SC TN VA WV 
+3-South: AL AR FL GA LA MS OK TX 
+4-Midwest: IL IN IA KS MI MN MO NE OH WI
+5-Rockies: CO ID MT ND SD UT WY 
+6-West: AK AZ CA HI NV NM OR WA
+Plot 6 groups on 1 page (par (mfrow=c (2,3) )), also with abline (h=50) . What do you notice? 
+
+Group by the north east states and then should be drawn their corresponding graphs.
+```{r}
+northeast = c("Connecticut","Delaware","Maine","Massachusetts","New Hampshire","New Jersey","New York","Pennsylvania","Rhode Island","Vermont")
+
+library("cluster")
+data(votes.repub)
+# line plots to compare the 10 different states
+#row.names(votes.repub)
+votes.repub$states=row.names(votes.repub)
+completeData = votes.repub
+library(reshape2)
+northeasstData= completeData[northeast,]
+TrimNorthEast = northeasstData[,c(1:5,11:13,29:32)]
+
+library(reshape2)
+meltedData <- melt(TrimNorthEast, id="states")
+
+
+North = ggplot(meltedData,aes(x= meltedData$variable, y=meltedData$value,group = meltedData$states, colour=meltedData$states))+geom_line(aes())+geom_abline(intercept = 50, slope = 0)
+```
+Second group of states , I am not chaninging the names of the variables, but the intution is that variable names are nothing but the region names.
+2-Mid-Atlantic/East-Central: KY MD NC SC TN VA WV
+```{r}
+northeast = c("Kentucky","Maryland","North Carolina","South Carolina","Tennessee","Virginia","West Virginia")
+
+library("cluster")
+data(votes.repub)
+# line plots to compare the 10 different states
+#row.names(votes.repub)
+votes.repub$states=row.names(votes.repub)
+completeData = votes.repub
+library(reshape2)
+northeasstData= completeData[northeast,]
+TrimNorthEast = northeasstData[,c(1:5,11:13,29:32)]
+
+library(reshape2)
+meltedData <- melt(TrimNorthEast, id="states")
+
+
+ggplot(meltedData,aes(x= meltedData$variable, y=meltedData$value,group = meltedData$states, colour=meltedData$states))+geom_line(aes())+geom_abline(intercept = 50, slope = 0)
+```
+
+3-South: AL AR FL GA LA MS OK TX 
+`
+```{r}
+
+
+northeast = c("Alabama","Arkansas","Florida","Georgia","Louisiana","Mississippi","Oklahoma","Texas")
+
+library("cluster")
+data(votes.repub)
+# line plots to compare the 10 different states
+#row.names(votes.repub)
+votes.repub$states=row.names(votes.repub)
+completeData = votes.repub
+library(reshape2)
+northeasstData= completeData[northeast,]
+TrimNorthEast = northeasstData[,c(1:5,11:13,29:32)]
+
+library(reshape2)
+meltedData <- melt(TrimNorthEast, id="states")
+
+ggplot(meltedData,aes(x= meltedData$variable, y=meltedData$value,group = meltedData$states, colour=meltedData$states))+geom_line(aes())+geom_abline(intercept = 50, slope = 0)
+```
+4-Midwest: IL IN IA KS MI MN MO NE OH WI
+
+```{r}
+northeast = c("Illinois","Indiana","Iowa","Kansas","Michigan","Minnesota","Missouri","Nebraska","Ohio","Wisconsin")
+
+library("cluster")
+data(votes.repub)
+# line plots to compare the 10 different states
+#row.names(votes.repub)
+votes.repub$states=row.names(votes.repub)
+completeData = votes.repub
+library(reshape2)
+northeasstData= completeData[northeast,]
+TrimNorthEast = northeasstData[,c(1:5,11:13,29:32)]
+
+library(reshape2)
+meltedData <- melt(TrimNorthEast, id="states")
+ggplot(meltedData,aes(x= meltedData$variable, y=meltedData$value,group = meltedData$states, colour=meltedData$states))+geom_line(aes())+geom_abline(intercept = 50, slope = 0)
+```
+5-Rockies: CO ID MT ND SD UT WY 
+
+```{r}
+northeast = c("Colorado","Idaho","Montana","North Dakota","South Dakota","Utah","Wyoming")
+
+library("cluster")
+data(votes.repub)
+# line plots to compare the 10 different states
+#row.names(votes.repub)
+votes.repub$states=row.names(votes.repub)
+completeData = votes.repub
+library(reshape2)
+northeasstData= completeData[northeast,]
+TrimNorthEast = northeasstData[,c(1:5,11:13,29:32)]
+
+library(reshape2)
+meltedData <- melt(TrimNorthEast, id="states")
+ggplot(meltedData,aes(x= meltedData$variable, y=meltedData$value,group = meltedData$states, colour=meltedData$states))+geom_line(aes())+geom_abline(intercept = 50, slope = 0)
+```
+6-West: AK AZ CA HI NV NM OR WA
+
+```{r}
+northeast = c("Alaska","Arizona","California","Hawaii","Nevada","New Mexico","Oregon","Washington")
+
+library("cluster")
+data(votes.repub)
+# line plots to compare the 10 different states
+#row.names(votes.repub)
+votes.repub$states=row.names(votes.repub)
+completeData = votes.repub
+library(reshape2)
+northeasstData= completeData[northeast,]
+TrimNorthEast = northeasstData[,c(1:5,11:13,29:32)]
+
+library(reshape2)
+meltedData <- melt(TrimNorthEast, id="states")
+
+ggplot(meltedData,aes(x= meltedData$variable, y=meltedData$value,group = meltedData$states, colour=meltedData$states))+geom_line(aes())+geom_abline(intercept = 50, slope = 0)
+
+library("grid")
+library("gridExtra")
+library("cowplot")
+
+#grid.arrange(Plot1,Plot2,Plot3,Plot4,Plot5,plot1)
+
+```
+
+3. Boxplots, QQ-plots of the data (all & by groups)
+Box plot by each region and see how each state in the region is.
+
+```{r}
+par(mfrow=par(mfrow=c(4,2)))
+northeast = c("Connecticut","Delaware","Maine","Massachusetts","New Hampshire","New Jersey","New York","Pennsylvania","Rhode Island","Vermont")
+
+library("cluster")
+data(votes.repub)
+# line plots to compare the 10 different states
+#row.names(votes.repub)
+votes.repub$states=row.names(votes.repub)
+completeData = votes.repub
+library(reshape2)
+northeasstData= completeData[northeast,]
+TrimNorthEast = northeasstData
+library(reshape2)
+meltedData <- melt(TrimNorthEast, id="states")
+boxplot(meltedData$value ~ meltedData$states)
+
+```
+```{r}
+northeast = c("Alaska","Arizona","California","Hawaii","Nevada","New Mexico","Oregon","Washington")
+library("cluster")
+data(votes.repub)
+# line plots to compare the 10 different states
+#row.names(votes.repub)
+votes.repub$states=row.names(votes.repub)
+completeData = votes.repub
+library(reshape2)
+northeasstData= completeData[northeast,]
+TrimNorthEast = northeasstData
+library(reshape2)
+meltedData <- melt(TrimNorthEast, id="states")
+boxplot(meltedData$value ~ meltedData$states)
+
+```
+```{r}
+
+northeast = c("Illinois","Indiana","Iowa","Kansas","Michigan","Minnesota","Missouri","Nebraska","Ohio","Wisconsin")
+library("cluster")
+data(votes.repub)
+# line plots to compare the 10 different states
+#row.names(votes.repub)
+votes.repub$states=row.names(votes.repub)
+completeData = votes.repub
+library(reshape2)
+northeasstData= completeData[northeast,]
+TrimNorthEast = northeasstData
+library(reshape2)
+meltedData <- melt(TrimNorthEast, id="states")
+boxplot(meltedData$value ~ meltedData$states)
+
+```
+```{r}
+northeast = c("Alabama","Arkansas","Florida","Georgia","Louisiana","Mississippi","Oklahoma","Texas")
+
+library("cluster")
+data(votes.repub)
+# line plots to compare the 10 different states
+#row.names(votes.repub)
+votes.repub$states=row.names(votes.repub)
+completeData = votes.repub
+library(reshape2)
+northeasstData= completeData[northeast,]
+TrimNorthEast = northeasstData
+library(reshape2)
+meltedData <- melt(TrimNorthEast, id="states")
+boxplot(meltedData$value ~ meltedData$states)
+
+```
+```{r}
+
+northeast = c("Colorado","Idaho","Montana","North Dakota","South Dakota","Utah","Wyoming")
+library("cluster")
+data(votes.repub)
+# line plots to compare the 10 different states
+#row.names(votes.repub)
+votes.repub$states=row.names(votes.repub)
+completeData = votes.repub
+library(reshape2)
+northeasstData= completeData[northeast,]
+TrimNorthEast = northeasstData
+library(reshape2)
+meltedData <- melt(TrimNorthEast, id="states")
+boxplot(meltedData$value ~ meltedData$states)
+
+```
+```{r}
+northeast = c("Illinois","Indiana","Iowa","Kansas","Michigan","Minnesota","Missouri","Nebraska","Ohio","Wisconsin")
+
+library("cluster")
+data(votes.repub)
+# line plots to compare the 10 different states
+#row.names(votes.repub)
+votes.repub$states=row.names(votes.repub)
+completeData = votes.repub
+library(reshape2)
+northeasstData= completeData[northeast,]
+TrimNorthEast = northeasstData
+library(reshape2)
+meltedData <- melt(TrimNorthEast, id="states")
+boxplot(meltedData$value ~ meltedData$states)
+
+```
+Draw QQ plot for each group and compare how the states are in the each group
+```{r}
+northeast = c("Illinois","Indiana","Iowa","Kansas","Michigan","Minnesota","Missouri","Nebraska","Ohio","Wisconsin")
+
+library("cluster")
+data(votes.repub)
+# line plots to compare the 10 different states
+#row.names(votes.repub)
+votes.repub$states=row.names(votes.repub)
+completeData = votes.repub
+library(reshape2)
+northeasstData= completeData[northeast,]
+TrimNorthEast = northeasstData
+library(reshape2)
+meltedData <- melt(TrimNorthEast, id="states")
+
+qqnorm(meltedData$value, main = "West")
+qqline(meltedData$value)
+
+
+northeast = c("Connecticut","Delaware","Maine","Massachusetts","New Hampshire","New Jersey","New York","Pennsylvania","Rhode Island","Vermont")
+
+library("cluster")
+data(votes.repub)
+# line plots to compare the 10 different states
+#row.names(votes.repub)
+votes.repub$states=row.names(votes.repub)
+completeData = votes.repub
+library(reshape2)
+northeasstData= completeData[northeast,]
+TrimNorthEast = northeasstData
+library(reshape2)
+meltedData <- melt(TrimNorthEast, id="states")
+qqnorm(meltedData$value, main = "NorthEast")
+qqline(meltedData$value)
+
+```
+```{r}
+northeast = c("Alaska","Arizona","California","Hawaii","Nevada","New Mexico","Oregon","Washington")
+library("cluster")
+data(votes.repub)
+# line plots to compare the 10 different states
+#row.names(votes.repub)
+votes.repub$states=row.names(votes.repub)
+completeData = votes.repub
+library(reshape2)
+northeasstData= completeData[northeast,]
+TrimNorthEast = northeasstData
+library(reshape2)
+meltedData <- melt(TrimNorthEast, id="states")
+qqnorm(meltedData$value, main = "south")
+qqline(meltedData$value)
+
+```
+```{r}
+
+northeast = c("Illinois","Indiana","Iowa","Kansas","Michigan","Minnesota","Missouri","Nebraska","Ohio","Wisconsin")
+library("cluster")
+data(votes.repub)
+# line plots to compare the 10 different states
+#row.names(votes.repub)
+votes.repub$states=row.names(votes.repub)
+completeData = votes.repub
+library(reshape2)
+northeasstData= completeData[northeast,]
+TrimNorthEast = northeasstData
+library(reshape2)
+meltedData <- melt(TrimNorthEast, id="states")
+qqnorm(meltedData$value, main = "mid-west")
+qqline(meltedData$value)
+
+```
+```{r}
+northeast = c("Alabama","Arkansas","Florida","Georgia","Louisiana","Mississippi","Oklahoma","Texas")
+
+library("cluster")
+data(votes.repub)
+# line plots to compare the 10 different states
+#row.names(votes.repub)
+votes.repub$states=row.names(votes.repub)
+completeData = votes.repub
+library(reshape2)
+northeasstData= completeData[northeast,]
+TrimNorthEast = northeasstData
+library(reshape2)
+meltedData <- melt(TrimNorthEast, id="states")
+qqnorm(meltedData$value, main = "south")
+qqline(meltedData$value)
+
+```
+
+```{r}
+
+northeast = c("Colorado","Idaho","Montana","North Dakota","South Dakota","Utah","Wyoming")
+library("cluster")
+data(votes.repub)
+# line plots to compare the 10 different states
+#row.names(votes.repub)
+votes.repub$states=row.names(votes.repub)
+completeData = votes.repub
+library(reshape2)
+northeasstData= completeData[northeast,]
+TrimNorthEast = northeasstData
+library(reshape2)
+meltedData <- melt(TrimNorthEast, id="states")
+qqnorm(meltedData$value, main = "Rockies")
+qqline(meltedData$value)
+
+```

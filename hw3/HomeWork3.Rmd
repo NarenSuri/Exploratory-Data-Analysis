@@ -1,0 +1,55 @@
+---
+title: "HomeWork3-NarenSuri"
+author: "Naren Suri"
+date: "September 30, 2015"
+output: html_document
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+Problem 6 on 127-128
+
+```{r}
+
+FourthLowers = c(3480, 2412, 1788, 1517, 1248, 963.5, 727.5, 579, 345, 114)
+MidSummaries = c(3480, 3678, 4115.5, 4400.5, 4799, 4978.75, 5241, 5394.5, 5510.25, 5494)
+FourthUppers = c(3480, 4944, 6443, 7284, 8350, 8994, 9754.5, 10210, 10675.5, 10874)
+
+# writing all thesse data in to the matrix form to #have a glance as it looks in the texxtbook
+
+HouseIncomeData = matrix(data=c(FourthLowers,MidSummaries,FourthUppers), ncol=3)
+HouseIncomeData
+
+# according to the equations we saw in the text #book page 120 a = x0 - (T(x0)/Derivat(T(x0))), #similarly b = 1/deriv(t(x0))
+
+Deivative = deriv(~x^(1/3),"x",func=T)
+MedianMidsummary = MidSummaries[1]
+# now lets calculat b first
+ForB = Deivative(MedianMidsummary)
+BValue = as.vector(1/ attr(ForB, "gradient"))
+# now lets find the A value
+AValue = as.vector(MedianMidsummary - BValue*MedianMidsummary^(1/3))
+AValue
+# to calculate the z value, we need to transform = cube root transfom this data
+CuberootTransformation = HouseIncomeData^(1/3)
+# now lets find the value of the z
+zValue = AValue + BValue*CuberootTransformation
+zValue
+
+# lets draw the letter value plot
+source("E:/Sem1-DataScience/Exploratory-DA/home-work/hw3/lvalprogs.r")
+lval(zValue)
+# A values
+AValue
+# B value
+BValue
+# compare the two summaries we got
+# original Data
+HouseIncomeData
+# new transformed summaries data
+zValue
+# if we observe the midsummaries of the two data's The original and the new, they looks similar. So our transfomration makes sense.
+```
+
+

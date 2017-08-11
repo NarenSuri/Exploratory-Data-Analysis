@@ -1,0 +1,51 @@
+
+Question 2.c
+The tukey ladder model said that once we calculate the correlation and if the value of the power is negitive, we have to transform with 1/datacolumn . 
+```{r}
+data(pressure)
+attach(pressure)
+x=pressure$temperature
+y=pressure$pressure
+x = x+273.15
+y = y*0.133
+NewTransforedTemperature = 1/(x)
+CleanedNewPowerddata = data.frame(x,NewTransforedTemperature)
+CleanedNewPowerddata
+plot(CleanedNewPowerddata$x~CleanedNewPowerddata$NewTransforedTemperature, main = "The pressure data scatter plot" )
+fit = lm(CleanedNewPowerddata$x~CleanedNewPowerddata$NewTransforedTemperature) 
+abline(fit, lty=4, col='orange')
+
+```
+The 1/x calculation brings a lot of straigtness. It looks very much transformed now.
+
+Question 2 : d
+For the above graph i have drawn, the intercept is to be calculated.
+```{r}
+x = pressure$temperature
+y=pressure$pressure
+x = x+273.15
+y = y*0.133
+NewTransforedTemperature = 1/(x)
+CleanedNewPowerddata = data.frame(x,NewTransforedTemperature)
+CleanedNewPowerddata
+plot(CleanedNewPowerddata$x~CleanedNewPowerddata$NewTransforedTemperature, main = "The pressure data scatter plot" )
+fit = lm(CleanedNewPowerddata$x~CleanedNewPowerddata$NewTransforedTemperature) 
+abline(fit, lty=4, col='orange')
+
+CorrelationValuforNewdata = cor(CleanedNewPowerddata,use = "everything", method = c("pearson"))
+corlation= CorrelationValuforNewdata
+corlation
+```
+The correlation between x and y tells that a value of 0.97 , which says that we can use a power factor of 0.97.
+but these can be again done in the other way explained in the book. lower, upper and mid summariess, get p as a set of medians obtained for the summaries. usse tha p for the calculations.
+
+Box Cox Tranformations
+```{r}
+library(MASS)
+boxcox(CleanedNewPowerddata$x~CleanedNewPowerddata$NewTransforedTemperature)
+plot(log(CleanedNewPowerddata$x)~CleanedNewPowerddata$NewTransforedTemperature, ylab = "Log(PressureOfData)", xlab = "Inverse temperature", col = "orange")
+fit = lm(log(CleanedNewPowerddata$x)~CleanedNewPowerddata$NewTransforedTemperature)
+print(fit)
+```
+
+
